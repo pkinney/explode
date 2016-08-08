@@ -3,7 +3,7 @@ defmodule Explode.Mixfile do
 
   def project do
     [app: :explode,
-     version: "0.0.1",
+     version: "0.1.0",
      elixir: "~> 1.2",
      description: description,
      package: package,
@@ -31,7 +31,8 @@ defmodule Explode.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:poison, "~> 2.1.0"},
-     {:plug, "~> 1.0", only: :test}]
+     {:plug, "~> 1.0", only: :test},
+     {:ex_doc, ">= 0.0.0", only: :dev}]
   end
 
   defp description do

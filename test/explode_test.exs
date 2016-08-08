@@ -3,13 +3,10 @@ defmodule ExplodeTest do
   use Plug.Test
 
   test "send a default message for an error" do
-    # Create a test connection
-    conn = conn(:get, "/hello")
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.with(:unauthorized)
 
-    # Invoke the plug
-    conn = Explode.with(conn, :unauthorized)
-
-    # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 401
     assert Poison.decode!(conn.resp_body) == %{
@@ -19,13 +16,10 @@ defmodule ExplodeTest do
   end
 
   test "send a add a custom message for an error" do
-    # Create a test connection
-    conn = conn(:get, "/hello")
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.with(:unauthorized, "Username and password invalid")
 
-    # Invoke the plug
-    conn = Explode.with(conn, :unauthorized, "Username and password invalid")
-
-    # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 401
     assert Poison.decode!(conn.resp_body) == %{
@@ -35,13 +29,10 @@ defmodule ExplodeTest do
   end
 
   test "common-name functions for each status code without a message" do
-    # Create a test connection
-    conn = conn(:get, "/hello")
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.unauthorized
 
-    # Invoke the plug
-    conn = Explode.unauthorized(conn)
-
-    # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 401
     assert Poison.decode!(conn.resp_body) == %{
@@ -51,13 +42,10 @@ defmodule ExplodeTest do
   end
 
   test "common-name functions for each status code with message" do
-    # Create a test connection
-    conn = conn(:get, "/hello")
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.unauthorized("Username and password invalid")
 
-    # Invoke the plug
-    conn = Explode.unauthorized(conn, "Username and password invalid")
-
-    # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 401
     assert Poison.decode!(conn.resp_body) == %{
@@ -67,13 +55,10 @@ defmodule ExplodeTest do
   end
 
   test "returns 500 for an unknown error" do
-    # Create a test connection
-    conn = conn(:get, "/hello")
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.with(:not_a_real_error, "foo")
 
-    # Invoke the plug
-    conn = Explode.with(conn, :not_a_real_error, "foo")
-
-    # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 500
     assert Poison.decode!(conn.resp_body) == %{
