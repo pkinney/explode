@@ -34,6 +34,38 @@ defmodule ExplodeTest do
       "statusCode" => 401}
   end
 
+  test "common-name functions for each status code without a message" do
+    # Create a test connection
+    conn = conn(:get, "/hello")
+
+    # Invoke the plug
+    conn = Explode.unauthorized(conn)
+
+    # Assert the response and status
+    assert conn.state == :sent
+    assert conn.status == 401
+    assert Poison.decode!(conn.resp_body) == %{
+      "error" => "Unauthorized",
+      "message" => "Unauthorized",
+      "statusCode" => 401}
+  end
+
+  test "common-name functions for each status code with message" do
+    # Create a test connection
+    conn = conn(:get, "/hello")
+
+    # Invoke the plug
+    conn = Explode.unauthorized(conn, "Username and password invalid")
+
+    # Assert the response and status
+    assert conn.state == :sent
+    assert conn.status == 401
+    assert Poison.decode!(conn.resp_body) == %{
+      "error" => "Unauthorized",
+      "message" => "Username and password invalid",
+      "statusCode" => 401}
+  end
+
   test "returns 500 for an unknown error" do
     # Create a test connection
     conn = conn(:get, "/hello")
