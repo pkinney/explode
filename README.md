@@ -29,5 +29,10 @@ conn
 into
 
 ```elixir
-conn |> Explode.with("You are not authorized to view this resource")
+conn |> Explode.with(403, "You are not authorized to view this resource")
+```
+or
+
+```elixir
+conn |> Explode.forbidden("You are not authorized to view this resource")
 ```
