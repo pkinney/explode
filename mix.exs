@@ -5,12 +5,12 @@ defmodule Explode.Mixfile do
     [app: :explode,
      version: "0.1.1",
      elixir: "~> 1.2",
-     description: description,
-     package: package,
+     description: description(),
+     package: package(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      test_coverage: [tool: ExCoveralls],
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -30,7 +30,7 @@ defmodule Explode.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:poison, "~> 2.1"},
+    [{:poison, "~> 2.1 or ~> 3.0"},
      {:plug, "~> 1.0", only: :test},
      {:ex_doc, ">= 0.0.0", only: :dev}]
   end
