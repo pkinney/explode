@@ -120,26 +120,5 @@ defmodule Explode do
       Explode.with(conn, unquote(code), message)
     end
   end
-
-  # ~S"""
-  # An extension of Explode that formats errors in a JSON API compliant way.  See
-  # http://jsonapi.org/format/#errors for more info.
-
-  # ```elixir
-  #   conn |> Explode.JA.forbidden("You are not authorized to view this resource")
-  # ```
-
-  # produces:
-
-  # ```json
-  #   {
-  #       "errors" : [{
-  #           "status": 403,
-  #           "title":"Forbidden",
-  #           "detail":"You are not authorized to view this resource"
-  #       }]
-  #   }
-  # ```
-  # """
 end
 
