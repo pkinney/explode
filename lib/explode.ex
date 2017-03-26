@@ -63,7 +63,9 @@ defmodule Explode do
           {510, :not_extended, "Not Extended"},
           {511, :network_authentication_required, "Network Authentication Required" }]
 
-  def with(conn, %Ecto.Changeset{} = changeset) do
+  def with(conn, %Ecto.Changeset{} = changeset), do: Explode.with(conn, :bad_request, changeset)
+  def with(conn, code, message \\ nil)
+  def with(conn, code, %Ecto.Changeset{} = changeset) do
     message = 
       changeset
       |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
@@ -71,13 +73,13 @@ defmodule Explode do
           String.replace(acc, "%{#{key}}", to_string(value))
         end)
       end) 
-      |> Enum.map(fn {k, v} -> "#{k} #{v}" end)
+      |> Enum.map(fn {k, v} -> "`#{k}` #{v}" end)
       |> Enum.join(", ")
 
-    Explode.with(conn, :bad_request, message)
+    Explode.with(conn, code, message)
   end
   
-  def with(conn, code, message \\ nil) do
+  def with(conn, code, message) do
     {status_code, error} = find_code_in_table(code)
     content_type = accept_type(conn)
 
@@ -116,7 +118,7 @@ defmodule Explode do
   end
 
   defp override_message(500, _), do: "An internal server error occurred"
-  defp override_message(status_code, message), do: message
+  defp override_message(_, message), do: message
 
   defp do_reply(conn, code, payload, content_type) do
     conn

@@ -69,7 +69,7 @@ defmodule ExplodeTest do
     assert conn.status == 400
     assert Poison.decode!(conn.resp_body) == %{
       "error" => "Bad Request",
-      "message" => "email can't be blank, password should be at least 5 character(s)",
+      "message" => "`email` can't be blank, `password` should be at least 5 character(s)",
       "statusCode" => 400}
   end
 

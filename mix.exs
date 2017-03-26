@@ -3,8 +3,8 @@ defmodule Explode.Mixfile do
 
   def project do
     [app: :explode,
-     version: "0.2.0",
-     elixir: "~> 1.2",
+     version: "0.3.0",
+     elixir: "~> 1.3",
      description: description(),
      package: package(),
      build_embedded: Mix.env == :prod,
