@@ -44,6 +44,34 @@ defmodule ExplodeTest do
       "message" => "Username and password invalid",
       "statusCode" => 401}
   end
+  
+  defmodule User do
+    defstruct [:first_name, :last_name, :email, :password]
+  end
+  
+  test "use errors from an Ecto.Changeset" do
+    changeset = %Ecto.Changeset{
+      action: :insert, 
+      types: %{},
+      changes: %{first_name: "John", last_name: "Smith", password: "foo"},
+      errors: [
+        password: {"should be at least %{count} character(s)", [count: 5, validation: :length, min: 5]},
+        email: {"can't be blank", [validation: :required]}],
+      valid?: false,
+      data: %User{}
+    }
+
+    conn = 
+      conn(:get, "/api/v1/things")
+      |> Explode.with(changeset)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert Poison.decode!(conn.resp_body) == %{
+      "error" => "Bad Request",
+      "message" => "email can't be blank, password should be at least 5 character(s)",
+      "statusCode" => 400}
+  end
 
   test "common-name functions for each status code without a message" do
     conn =

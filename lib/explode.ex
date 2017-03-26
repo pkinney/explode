@@ -63,6 +63,20 @@ defmodule Explode do
           {510, :not_extended, "Not Extended"},
           {511, :network_authentication_required, "Network Authentication Required" }]
 
+  def with(conn, %Ecto.Changeset{} = changeset) do
+    message = 
+      changeset
+      |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          String.replace(acc, "%{#{key}}", to_string(value))
+        end)
+      end) 
+      |> Enum.map(fn {k, v} -> "#{k} #{v}" end)
+      |> Enum.join(", ")
+
+    Explode.with(conn, :bad_request, message)
+  end
+  
   def with(conn, code, message \\ nil) do
     {status_code, error} = find_code_in_table(code)
     content_type = accept_type(conn)
