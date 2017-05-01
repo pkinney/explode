@@ -63,43 +63,73 @@ defmodule Explode do
           {510, :not_extended, "Not Extended"},
           {511, :network_authentication_required, "Network Authentication Required" }]
 
-  def with(conn, code, message \\ nil) do
-    {status_code, obj} = payload_for(code)
-    case {status_code, message} do
-      {500, _} -> do_reply(conn, 500, Map.put(obj, "message", "An internal server error occurred"))
-      {_, nil} -> do_reply(conn, status_code, obj)
-      _ -> do_reply(conn, status_code, Map.put(obj, "message", message))
+  def with(conn, %Ecto.Changeset{} = changeset), do: Explode.with(conn, :bad_request, changeset)
+  def with(conn, code, message \\ nil)
+  def with(conn, code, %Ecto.Changeset{} = changeset) do
+    message = 
+      changeset
+      |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          String.replace(acc, "%{#{key}}", to_string(value))
+        end)
+      end) 
+      |> Enum.map(fn {k, v} -> "`#{k}` #{v}" end)
+      |> Enum.join(", ")
+
+    Explode.with(conn, code, message)
+  end
+  
+  def with(conn, code, message) do
+    {status_code, error} = find_code_in_table(code)
+    content_type = accept_type(conn)
+
+    payload = build_body(status_code, error, message, content_type)
+
+    do_reply(conn, status_code, payload, content_type)
+  end
+
+  defp find_code_in_table(name) do
+    case List.keyfind(@table, name, table_position_for(name)) do
+      nil -> find_code_in_table(:internal_server_error)
+      {status_code, _, error} -> {status_code, error}
     end
   end
 
-  defp do_reply(conn, code, payload) do
+  defp table_position_for(key) when is_atom(key), do: 1
+  defp table_position_for(key) when is_number(key), do: 0
+
+  defp build_body(status_code, error, nil, content_type), do: build_body(status_code, error, error, content_type)
+  defp build_body(status_code, error, message, "application/vnd.api+json") do
+    %{
+      errors: [%{
+        status: status_code,
+        title: error,
+        detail: override_message(status_code, message)
+      }]
+    }
+  end
+
+  defp build_body(status_code, error, message, _) do
+    %{
+      statusCode: status_code,
+      error: error,
+      message: override_message(status_code, message)
+    }
+  end
+
+  defp override_message(500, _), do: "An internal server error occurred"
+  defp override_message(_, message), do: message
+
+  defp do_reply(conn, code, payload, content_type) do
     conn
-    |> Plug.Conn.put_resp_content_type("application/json")
+    |> Plug.Conn.put_resp_content_type(content_type)
     |> Plug.Conn.send_resp(code, Poison.encode!(payload))
     |> Plug.Conn.halt
   end
 
-  defp payload_for(a) when is_atom(a) do
-    case List.keyfind(@table, a, 1) do
-      {status_code, _, error} -> {status_code, build_body(status_code, error)}
-      _ -> payload_for(500)
-    end
-  end
-
-  defp payload_for(a) when is_number(a) do
-    case List.keyfind(@table, a, 0) do
-      {status_code, _, error} -> {status_code, build_body(status_code, error)}
-      _ -> payload_for(500)
-    end
-  end
-
-  defp build_body(status_code, error) do
-    %{
-      "statusCode" => status_code,
-      "error" => error,
-      "message" => error
-    }
-  end
+  defp accept_type(%{req_headers: [{"accept", type} | _]}), do: type
+  defp accept_type(%{req_headers: [_ | rest]}), do: accept_type(%{req_headers: rest})
+  defp accept_type(_), do: "application/json"
 
   for {code, atom, _} <- @table do
     def unquote(:"#{atom}")(conn, message \\ nil) do
@@ -107,3 +137,4 @@ defmodule Explode do
     end
   end
 end
+
