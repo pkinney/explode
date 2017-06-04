@@ -11,7 +11,7 @@ This project is heavily influenced by Hapi's Boom module [https://github.com/hap
 
 ```elixir
 defp deps do
-  [{:explode, "~> 1.0.0"}]
+  [{:explode, "~> 1.0.1"}]
 end
 ```
 
