@@ -74,6 +74,52 @@ defmodule ExplodeTest do
       "statusCode" => 400}
   end
 
+  test "use nested errors from an Ecto.Changeset" do
+    changeset = %Ecto.Changeset{
+      action: :insert,
+      types: %{
+        name: :string,
+        dummy: :integer,
+        pages: {:assoc, %Ecto.Association.ManyToMany{
+          field: :pages,
+          defaults: [],
+          cardinality: :many
+        }}
+      },
+      changes: %{
+        dummy: 4,
+        pages: [
+          %Ecto.Changeset{
+            types: %{},
+            action: :insert,
+            changes: %{name: "test", type: "text"},
+            errors: [],
+            valid?: true
+            },
+          %Ecto.Changeset{
+            types: %{},
+            action: :insert,
+            changes: %{type: "text"},
+            errors: [name: {"can't be blank", [validation: :required]}],
+            valid?: false
+          }
+        ]
+      },
+      errors: [name: {"can't be blank", [validation: :required]}],
+      valid?: false
+    }
+    
+    conn =
+      conn(:get, "/api/v1/things")
+      |> Explode.with(changeset)
+
+    assert conn.state == :sent
+    assert Poison.decode!(conn.resp_body) == %{
+      "error" => "Bad Request",
+      "message" => "`name` can't be blank, `pages` `name` can't be blank",
+      "statusCode" => 400}
+  end
+
   test "common-name functions for each status code without a message" do
     conn =
       conn(:get, "/api/v1/things")
