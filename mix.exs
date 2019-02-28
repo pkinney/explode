@@ -3,7 +3,7 @@ defmodule Explode.Mixfile do
 
   def project do
     [app: :explode,
-     version: "1.0.0",
+     version: "1.1.0",
      elixir: "~> 1.3",
      description: description(),
      package: package(),
@@ -33,7 +33,7 @@ defmodule Explode.Mixfile do
     [{:poison, "~> 2.1 or ~> 3.0"},
      {:ecto, ">= 2.0.0"},
      {:plug, "~> 1.0", only: :test},
-     {:ex_doc, ">= 0.0.0", only: :dev}]
+     {:ex_doc, "~> 0.18", only: :dev}]
   end
 
   defp description do
