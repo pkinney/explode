@@ -73,8 +73,7 @@ defmodule Explode do
           String.replace(acc, "%{#{key}}", to_string(value))
         end)
       end) 
-      |> Enum.map(fn {k, v} -> "`#{k}` #{v}" end)
-      |> Enum.join(", ")
+      |> parse_changeset_error
 
     Explode.with(conn, code, message)
   end
@@ -86,6 +85,28 @@ defmodule Explode do
     payload = build_body(status_code, error, message, content_type)
 
     do_reply(conn, status_code, payload, content_type)
+  end
+
+  defp parse_changeset_error(val) when is_map(val) do
+    val
+    |> Enum.map(fn {k, v} ->
+      r = parse_changeset_error(v)
+      "`#{k}` #{r}"
+    end)
+    |> Enum.join(", ")
+  end
+
+  defp parse_changeset_error(val) when is_list(val) do
+    val
+    |> Enum.map(fn v ->
+      parse_changeset_error(v)
+    end)
+    |> Enum.filter(fn s -> s != "" end)
+    |> Enum.join(", ")
+  end
+
+  defp parse_changeset_error(val) when is_bitstring(val) do
+    val
   end
 
   defp find_code_in_table(name) do
