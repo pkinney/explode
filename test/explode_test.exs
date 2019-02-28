@@ -23,6 +23,7 @@ defmodule ExplodeTest do
 
     assert conn.state == :sent
     assert conn.status == 401
+    assert Enum.member?(conn.resp_headers, {"content-type", "application/vnd.api+json; charset=utf-8"})
     assert Poison.decode!(conn.resp_body) == %{
       "errors" => [%{
         "status" => 401,
