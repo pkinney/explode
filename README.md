@@ -98,3 +98,11 @@ will result in the following error response:
   "message": "`email` can't be blank, `password` should be at least 5 character(s)"
 }
 ```
+
+### Bring your own JSON encoder
+
+Explode by default with use [Poison](https://github.com/devinus/poison) as the JSON encoding library. If you want to change that out, you can do so in `config.exs`
+
+```elixir
+config(:explode, :json_library, Jason)
+```
