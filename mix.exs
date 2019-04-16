@@ -4,7 +4,7 @@ defmodule Explode.Mixfile do
   def project do
     [
       app: :explode,
-      version: "1.1.0",
+      version: "1.1.1",
       elixir: "~> 1.3",
       description: description(),
       package: package(),
