@@ -42,39 +42,41 @@ Explode sets the status code of the response and normalizes errors into a single
 
 ```json
 {
-    "statusCode": 403,
-    "error": "Not Authorized",
-    "message": "You are not authorized to view this resource"
+  "statusCode": 403,
+  "error": "Not Authorized",
+  "message": "You are not authorized to view this resource"
 }
 ```
 
 ### JSON API
 
-In order to be compliant with the JSON API spec (http://jsonapi.org/format/#errors), 
-if the request headers in the `conn` object passed to Explode includes `Accept` 
+In order to be compliant with the JSON API spec (http://jsonapi.org/format/#errors),
+if the request headers in the `conn` object passed to Explode includes `Accept`
 of `"application/vnd.api+json"`, then the error response will be formatted to match
-the JSON API Error Object spect (http://jsonapi.org/format/#errors).  Additionally,
-the `Content-Type` header of the response will also be set to 
+the JSON API Error Object spect (http://jsonapi.org/format/#errors). Additionally,
+the `Content-Type` header of the response will also be set to
 `"application/vnd.api+json"`.
 
 ```json
-{		
-    "errors" : [{		
-        "status": 403,		
-        "title":"Forbidden",		
-        "detail":"You are not authorized to view this resource"		
-    }]		
+{
+  "errors": [
+    {
+      "status": 403,
+      "title": "Forbidden",
+      "detail": "You are not authorized to view this resource"
+    }
+  ]
 }
 ```
 
 ### Ecto Changeset
 
-Explode will also accept an `Ecto.Changeset` struct instead of a message.  This allows a Pheonix application to
+Explode will also accept an `Ecto.Changeset` struct instead of a message. This allows a Pheonix application to
 directly hand a Changeset to Explode without having to do an traversal of errors.
 
 ```elixir
 changeset = %Ecto.Changeset{
-  action: :insert, 
+  action: :insert,
   types: %{},
   changes: %{first_name: "John", last_name: "Smith", password: "foo"},
   errors: [
@@ -91,8 +93,16 @@ will result in the following error response:
 
 ```json
 {
-    "statusCode": 400,
-    "error": "Bad Request",
-    "message": "`email` can't be blank, `password` should be at least 5 character(s)"
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "`email` can't be blank, `password` should be at least 5 character(s)"
 }
+```
+
+### Bring your own JSON encoder
+
+Explode by default with use [Poison](https://github.com/devinus/poison) as the JSON encoding library. If you want to change that out, you can do so in `config.exs`
+
+```elixir
+config(:explode, :json_library, Jason)
 ```
