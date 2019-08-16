@@ -71,7 +71,7 @@ the `Content-Type` header of the response will also be set to
 
 ### Ecto Changeset
 
-Explode will also accept an `Ecto.Changeset` struct instead of a message. This allows a Pheonix application to
+Explode will also accept an `Ecto.Changeset` struct instead of a message. This allows a Phoenix application to
 directly hand a Changeset to Explode without having to do an traversal of errors.
 
 ```elixir
