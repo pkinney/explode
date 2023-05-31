@@ -1,6 +1,6 @@
 # Explode
 
-[![Build Status](https://travis-ci.org/pkinney/explode.svg?branch=master)](https://travis-ci.org/pkinney/explode)
+[![CI](https://github.com/pkinney/explode/actions/workflows/ci.yaml/badge.svg)](https://github.com/pkinney/explode/actions/workflows/ci.yaml)
 [![Hex.pm](https://img.shields.io/hexpm/v/explode.svg)](https://hex.pm/packages/explode)
 
 An easy utility for responding with standard HTTP/JSON error payloads in Plug- and Phoenix-based applications.

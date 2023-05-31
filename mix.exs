@@ -11,7 +11,8 @@ defmodule Explode.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -52,6 +53,16 @@ defmodule Explode.Mixfile do
       maintainers: ["Powell Kinney"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/pkinney/explode"}
+    ]
+  end
+
+  defp aliases do
+    [
+      validate: [
+        "clean",
+        "compile --warnings-as-error",
+        "format --check-formatted"
+      ]
     ]
   end
 end
